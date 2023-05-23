@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+  mongo:
+    image: mongo
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+
+  postgres:
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=example
+
+  # minio:
+  #   image: minio/minio
+  #   volumes:
+  #     - ./storage:/data
+  #   ports:
+  #     - "9000:9000"
+  #     - "9090:9090"
+  #   command: server /data --console-address ":9090"
+
+
+  api:
+    build: .
+    volumes:
+      - .:/app
+    ports:
+      - 8000:8000
+    environment:
+      - DB_HOST=postgres
+      - DB_USER=postgres
+      - DB_PASSWORD=example
+      - DB_NAME=postgres
+      - DB_PORT=5432
+      - MONGO_URL=mongodb://root:example@localhost:27017
+    command: go run server.go
+    depends_on:
+      - mongo
+      - postgres
+  
